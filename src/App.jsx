@@ -14,7 +14,7 @@ function App() {
       <main className="main-content">
         <header className="app-header">
           <div className="model-info">
-            Gemini <span className="model-badge">2.0 Flash</span>
+            Llama 3 <span className="model-badge">via Hugging Face</span>
           </div>
           <div 
             className="user-profile" 

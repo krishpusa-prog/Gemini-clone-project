@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Image as ImageIcon, Send, X, MicOff } from 'lucide-react';
 import useChatStore from '../../store/useChatStore';
-import { runChat } from '../../api/gemini';
+// SWITCH: Now using Hugging Face instead of Gemini
+import { runChat } from '../../api/huggingface';
 import './PromptInput.css';
 
 const PromptInput = () => {
-  // Store actions
   const storeInputValue = useChatStore((state) => state.inputValue);
   const setStoreInputValue = useChatStore((state) => state.setInputValue);
   const addMessage = useChatStore((state) => state.addMessage);
@@ -13,7 +13,6 @@ const PromptInput = () => {
   const setError = useChatStore((state) => state.setError);
   const isLoading = useChatStore((state) => state.isLoading);
 
-  // Local state for the text currently being typed
   const [localInput, setLocalInput] = useState('');
   const [image, setImage] = useState(null);
   const [isListening, setIsListening] = useState(false);
@@ -21,16 +20,13 @@ const PromptInput = () => {
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // EFFECT: Only trigger when a suggested prompt is clicked (from the store)
   useEffect(() => {
     if (storeInputValue) {
-      // If we got a value from the store (Suggested Prompt), send it immediately
       handleSend(storeInputValue);
-      setStoreInputValue(''); // Clear store so it doesn't trigger again
+      setStoreInputValue('');
     }
   }, [storeInputValue]);
 
-  // Initialize Speech Recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -41,7 +37,7 @@ const PromptInput = () => {
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        setLocalInput(transcript); // Update local input from voice
+        setLocalInput(transcript);
         setIsListening(false);
       };
 
@@ -84,12 +80,13 @@ const PromptInput = () => {
       image: image?.preview 
     });
     
-    setLocalInput(''); // Clear local input
+    setLocalInput('');
     setImage(null);
     setError(null);
     setLoading(true);
     
     try {
+      // Logic for sending to Hugging Face
       const response = await runChat(prompt, image);
       addMessage({ role: 'model', content: response });
     } catch (err) {
@@ -117,14 +114,14 @@ const PromptInput = () => {
           value={localInput}
           onChange={(e) => setLocalInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={isLoading ? "Gemini is thinking..." : "Enter a prompt here"}
+          placeholder={isLoading ? "Llama 3 is thinking..." : "Enter a prompt here"}
           className="prompt-field"
           disabled={isLoading}
         />
         
         <div className="input-actions">
           <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
-          <button className="action-btn" onClick={() => fileInputRef.current.click()} title="Upload Image" disabled={isLoading}>
+          <button className="action-btn" onClick={() => fileInputRef.current.click()} title="Upload Image (Text only model)" disabled={isLoading}>
             <ImageIcon size={20} />
           </button>
           
