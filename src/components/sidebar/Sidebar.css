@@ -59,14 +59,51 @@
   border-radius: 8px;
   font-size: 0.85rem;
   color: var(--text-main);
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
+  position: relative;
 }
 
 .history-item:hover {
   background-color: var(--bg-hover);
+}
+
+.history-item.active {
+  background-color: rgba(75, 144, 255, 0.1);
+  color: var(--color-blue);
+}
+
+.history-item.active .history-item-icon {
+  color: var(--color-blue);
+}
+
+.chat-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-chat-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.history-item:hover .delete-chat-btn {
+  opacity: 1;
+}
+
+.delete-chat-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-red);
 }
 
 .history-item-icon {
