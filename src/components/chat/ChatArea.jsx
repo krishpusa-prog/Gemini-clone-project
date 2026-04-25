@@ -5,7 +5,11 @@ import MarkdownRenderer from '../common/MarkdownRenderer';
 import './ChatArea.css';
 
 const ChatArea = () => {
-  const { messages, isLoading, setLoading } = useChatStore();
+  const messages = useChatStore((state) => {
+    const activeChat = state.chats.find((c) => c.id === state.activeChatId);
+    return activeChat ? activeChat.messages : [];
+  });
+  const { isLoading, setLoading } = useChatStore();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {

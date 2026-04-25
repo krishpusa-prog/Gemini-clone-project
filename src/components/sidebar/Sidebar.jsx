@@ -4,28 +4,46 @@ import useChatStore from '../../store/useChatStore';
 import './Sidebar.css';
 
 const Sidebar = () => {
-  const { messages, clearHistory } = useChatStore();
+  const { 
+    chats, 
+    activeChatId, 
+    setActiveChat, 
+    createNewChat, 
+    deleteChat, 
+    clearAllHistory 
+  } = useChatStore();
 
-  // Filter only user messages to show as chat titles
-  const chatHistory = messages
-    .filter(msg => msg.role === 'user')
-    .slice(-10) // Show last 10 interactions
-    .reverse();
+  // Sort chats by updatedAt (most recent first)
+  const sortedChats = [...chats].sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
     <aside className="sidebar-container">
-      <button className="new-chat-btn" onClick={clearHistory}>
+      <button className="new-chat-btn" onClick={createNewChat}>
         <Plus size={20} className="plus-icon" /> New Chat
       </button>
       
       <div className="sidebar-history">
         <p className="history-label">Recent</p>
         <div className="history-list">
-          {chatHistory.length > 0 ? (
-            chatHistory.map((msg) => (
-              <div key={msg.id} className="history-item" title={msg.content}>
+          {sortedChats.length > 0 ? (
+            sortedChats.map((chat) => (
+              <div 
+                key={chat.id} 
+                className={`history-item ${activeChatId === chat.id ? 'active' : ''}`}
+                onClick={() => setActiveChat(chat.id)}
+              >
                 <MessageSquare size={16} className="history-item-icon" />
-                <span>{msg.content}</span>
+                <span className="chat-title" title={chat.title}>{chat.title}</span>
+                <button 
+                  className="delete-chat-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteChat(chat.id);
+                  }}
+                  title="Delete chat"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))
           ) : (
@@ -37,9 +55,9 @@ const Sidebar = () => {
       </div>
 
       <div className="sidebar-footer">
-        <button className="clear-btn" onClick={clearHistory}>
+        <button className="clear-btn" onClick={clearAllHistory}>
           <Trash2 size={16} />
-          Clear History
+          Clear All History
         </button>
       </div>
     </aside>
