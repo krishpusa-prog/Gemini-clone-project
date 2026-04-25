@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Stable empty reference to prevent infinite re-render loops in selectors
+export const EMPTY_MESSAGES = [];
+
 const useChatStore = create(
   persist(
     (set, get) => ({
@@ -8,13 +11,6 @@ const useChatStore = create(
       activeChatId: null,
       isLoading: false,
       error: null,
-
-      // Selectors
-      getMessages: () => {
-        const state = get();
-        const activeChat = state.chats.find((c) => c.id === state.activeChatId);
-        return activeChat ? activeChat.messages : [];
-      },
 
       // Actions
       setActiveChat: (id) => set({ activeChatId: id }),

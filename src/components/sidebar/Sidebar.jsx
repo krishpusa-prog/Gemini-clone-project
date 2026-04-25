@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MessageSquare, Trash2, Plus, Edit2, Check, X } from 'lucide-react';
 import useChatStore from '../../store/useChatStore';
 import './Sidebar.css';
 
 const Sidebar = () => {
-  const { 
-    chats, 
-    activeChatId, 
-    setActiveChat, 
-    createNewChat, 
-    deleteChat, 
-    renameChat,
-    clearAllHistory 
-  } = useChatStore();
+  // Use atomic selectors to prevent the entire sidebar from re-rendering
+  // when only one part of the state changes.
+  const chats = useChatStore((state) => state.chats);
+  const activeChatId = useChatStore((state) => state.activeChatId);
+  const setActiveChat = useChatStore((state) => state.setActiveChat);
+  const createNewChat = useChatStore((state) => state.createNewChat);
+  const deleteChat = useChatStore((state) => state.deleteChat);
+  const renameChat = useChatStore((state) => state.renameChat);
+  const clearAllHistory = useChatStore((state) => state.clearAllHistory);
 
   const [editingChatId, setEditingChatId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
 
-  // Sort chats by updatedAt (most recent first)
-  const sortedChats = [...chats].sort((a, b) => b.updatedAt - a.updatedAt);
+  // Sort chats by updatedAt (most recent first) - memoized to prevent sorting on every render
+  const sortedChats = useMemo(() => 
+    [...chats].sort((a, b) => b.updatedAt - a.updatedAt),
+  [chats]);
 
   const handleStartRename = (e, chat) => {
     e.stopPropagation();

@@ -1,29 +1,32 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
-import useChatStore from '../../store/useChatStore';
+import useChatStore, { EMPTY_MESSAGES } from '../../store/useChatStore';
 import MarkdownRenderer from '../common/MarkdownRenderer';
 import './ChatArea.css';
 
 const ChatArea = () => {
+  // Use a stable reference for messages to prevent infinite re-render loops
   const messages = useChatStore((state) => {
     const activeChat = state.chats.find((c) => c.id === state.activeChatId);
-    return activeChat ? activeChat.messages : [];
+    return activeChat ? activeChat.messages : EMPTY_MESSAGES;
   });
-  const { isLoading, setLoading } = useChatStore();
+  
+  const isLoading = useChatStore((state) => state.isLoading);
+  const setLoading = useChatStore((state) => state.setLoading);
+  
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages, isLoading, scrollToBottom]);
 
   const handleRegenerate = () => {
     if (isLoading) return;
     setLoading(true);
-    // Simulate regeneration delay
     setTimeout(() => {
       setLoading(false);
     }, 1500);
@@ -55,22 +58,7 @@ const ChatArea = () => {
                   {isLastModelMessage && !isLoading && (
                     <button 
                       onClick={handleRegenerate}
-                      style={{ 
-                        marginTop: '12px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '6px', 
-                        background: 'transparent', 
-                        border: '1px solid #444', 
-                        padding: '6px 12px', 
-                        borderRadius: '20px', 
-                        color: '#a0a0a0', 
-                        cursor: 'pointer', 
-                        fontSize: '0.85rem',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseOver={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#666'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.color = '#a0a0a0'; e.currentTarget.style.borderColor = '#444'; }}
+                      className="regenerate-btn"
                       title="Regenerate response"
                     >
                       <RefreshCw size={14} />

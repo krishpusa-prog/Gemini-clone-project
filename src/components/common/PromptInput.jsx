@@ -5,11 +5,17 @@ import './PromptInput.css';
 
 const PromptInput = () => {
   const [input, setInput] = useState('');
-  const { addMessage, setLoading, setError } = useChatStore();
+  
+  // Use atomic selectors for performance
+  const addMessage = useChatStore((state) => state.addMessage);
+  const setLoading = useChatStore((state) => state.setLoading);
+  const setError = useChatStore((state) => state.setError);
+  const isLoading = useChatStore((state) => state.isLoading);
 
   const handleSend = async () => {
     const prompt = input.trim();
-    if (!prompt) return;
+    // Prevent sending if empty or if already loading
+    if (!prompt || isLoading) return;
     
     addMessage({ role: 'user', content: prompt });
     setInput('');
@@ -22,20 +28,17 @@ const PromptInput = () => {
     } catch (err) {
       console.error("Chat Error:", err);
       
-      // Determine error type for cleaner UI feedback
-      let errorRole = 'error';
       let errorMessage = err.message;
 
-      // Handle specific categories if needed
       if (errorMessage.includes("Safety")) {
         errorMessage = "🛡️ Content Filter: " + errorMessage;
       } else if (errorMessage.includes("Rate limit")) {
-        errorMessage = "⏳ " + errorMessage;
+        errorMessage = "⏳ Rate limit reached. The Free Tier of Gemini has a limit on how many messages you can send per minute. Please wait 60 seconds and try again.";
       }
 
       setError(errorMessage);
       addMessage({ 
-        role: errorRole, 
+        role: 'error', 
         content: errorMessage 
       });
     } finally {
@@ -45,22 +48,40 @@ const PromptInput = () => {
 
   return (
     <div className="input-wrapper">
-      <div className="input-container">
+      <div className="input-container" style={{ opacity: isLoading ? 0.7 : 1 }}>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Enter a prompt here"
+          placeholder={isLoading ? "Gemini is thinking..." : "Enter a prompt here"}
           className="prompt-field"
+          disabled={isLoading}
         />
         <div className="input-actions">
-          <button className="action-btn" title="Upload Image (Coming Soon)">📷</button>
-          <button className="action-btn" title="Use Microphone (Coming Soon)">🎤</button>
+          <button 
+            className="action-btn" 
+            title="Upload Image (Coming Soon)"
+            disabled={isLoading}
+          >
+            📷
+          </button>
+          <button 
+            className="action-btn" 
+            title="Use Microphone (Coming Soon)"
+            disabled={isLoading}
+          >
+            🎤
+          </button>
           <button 
             onClick={handleSend}
             className="send-btn"
             title="Send Message"
+            disabled={isLoading || !input.trim()}
+            style={{ 
+              color: (isLoading || !input.trim()) ? '#444' : 'var(--color-blue)',
+              cursor: (isLoading || !input.trim()) ? 'not-allowed' : 'pointer'
+            }}
           >
             ➤
           </button>
