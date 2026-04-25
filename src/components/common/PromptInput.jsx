@@ -11,30 +11,34 @@ const PromptInput = () => {
     const prompt = input.trim();
     if (!prompt) return;
     
-    // 1. Add user message to UI immediately
     addMessage({ role: 'user', content: prompt });
     setInput('');
-    setError(null); // Clear previous errors
-    
-    // 2. Trigger loading state
+    setError(null);
     setLoading(true);
     
     try {
-      // 3. Call real Gemini API
       const response = await runChat(prompt);
-      
-      // 4. Add AI response to UI
       addMessage({ role: 'model', content: response });
     } catch (err) {
-      // 5. Handle errors gracefully
       console.error("Chat Error:", err);
-      setError(err.message);
+      
+      // Determine error type for cleaner UI feedback
+      let errorRole = 'error';
+      let errorMessage = err.message;
+
+      // Handle specific categories if needed
+      if (errorMessage.includes("Safety")) {
+        errorMessage = "🛡️ Content Filter: " + errorMessage;
+      } else if (errorMessage.includes("Rate limit")) {
+        errorMessage = "⏳ " + errorMessage;
+      }
+
+      setError(errorMessage);
       addMessage({ 
-        role: 'error', 
-        content: `Sorry, I encountered an error: ${err.message}. Please check your API key and connection.` 
+        role: errorRole, 
+        content: errorMessage 
       });
     } finally {
-      // 6. End loading state
       setLoading(false);
     }
   };

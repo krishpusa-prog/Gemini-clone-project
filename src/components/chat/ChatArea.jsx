@@ -44,10 +44,10 @@ const ChatArea = () => {
             const isLastModelMessage = msg.role !== 'user' && index === messages.findLastIndex(m => m.role !== 'user');
             
             return (
-              <div key={msg.id} className="message-item">
+              <div key={msg.id} className={`message-item ${msg.role === 'error' ? 'error' : ''}`}>
                 <div 
-                  className="avatar" 
-                  style={{ backgroundColor: msg.role === 'user' ? '#3b82f6' : '#22c55e' }} 
+                  className={`avatar ${msg.role === 'error' ? 'error' : ''}`} 
+                  style={{ backgroundColor: msg.role === 'user' ? '#3b82f6' : (msg.role === 'error' ? '#ef4444' : '#22c55e') }} 
                 />
                 <div className="message-content">
                   {msg.role === 'user' ? msg.content : <MarkdownRenderer content={msg.content} />}

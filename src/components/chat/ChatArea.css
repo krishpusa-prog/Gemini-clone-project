@@ -58,37 +58,48 @@
   color: #e5e7eb;
 }
 
+.thinking-indicator {
+  color: var(--text-dim);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+/* Error Styles */
+.message-item.error .message-content {
+  color: #f87171;
+  background-color: rgba(239, 68, 68, 0.05);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.avatar.error {
+  background-color: #ef4444 !important;
+}
+
+/* Typing Indicator (Friend 2 implementation) */
 .typing-indicator {
   display: flex;
-  align-items: center;
   gap: 4px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  width: fit-content;
-  color: var(--text-dim);
+  padding: 10px;
 }
 
 .typing-dot {
   width: 6px;
   height: 6px;
+  background-color: #888;
   border-radius: 50%;
-  background-color: currentColor;
-  animation: typingBounce 1.4s infinite ease-in-out both;
+  animation: bounce 1.4s infinite ease-in-out;
 }
 
-.typing-dot:nth-child(1) {
-  animation-delay: -0.32s;
-}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
-.typing-dot:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-@keyframes typingBounce {
-  0%, 80%, 100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
 }
