@@ -1,11 +1,17 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Volume2, Compass, Code, Edit3, Plane } from 'lucide-react';
 import useChatStore, { EMPTY_MESSAGES } from '../../store/useChatStore';
 import MarkdownRenderer from '../common/MarkdownRenderer';
 import './ChatArea.css';
 
+const SUGGESTED_PROMPTS = [
+  { text: "Help me write a Python script for a simple web scraper", icon: <Code size={20} color="#4b90ff" /> },
+  { text: "Plan a 3-day trip to Tokyo including hidden gems", icon: <Plane size={20} color="#ff5546" /> },
+  { text: "Explain quantum physics like I'm 5 years old", icon: <Compass size={20} color="#fabd05" /> },
+  { text: "Write a professional email asking for a job referral", icon: <Edit3 size={20} color="#34a853" /> },
+];
+
 const ChatArea = () => {
-  // Use a stable reference for messages to prevent infinite re-render loops
   const messages = useChatStore((state) => {
     const activeChat = state.chats.find((c) => c.id === state.activeChatId);
     return activeChat ? activeChat.messages : EMPTY_MESSAGES;
@@ -13,6 +19,7 @@ const ChatArea = () => {
   
   const isLoading = useChatStore((state) => state.isLoading);
   const setLoading = useChatStore((state) => state.setLoading);
+  const setInputValue = useChatStore((state) => state.setInputValue);
   
   const messagesEndRef = useRef(null);
 
@@ -23,6 +30,11 @@ const ChatArea = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading, scrollToBottom]);
+
+  const handleSpeak = (text) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleRegenerate = () => {
     if (isLoading) return;
@@ -36,10 +48,21 @@ const ChatArea = () => {
     <div className="chat-container">
       {messages.length === 0 ? (
         <div className="welcome-screen">
-          <h1 className="welcome-title">
-            Hello, user
-          </h1>
+          <h1 className="welcome-title">Hello, user</h1>
           <p className="welcome-subtitle">How can I help you today?</p>
+          
+          <div className="suggested-grid">
+            {SUGGESTED_PROMPTS.map((prompt, i) => (
+              <div 
+                key={i} 
+                className="suggested-card"
+                onClick={() => setInputValue(prompt.text)}
+              >
+                <p>{prompt.text}</p>
+                <div className="card-icon">{prompt.icon}</div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="messages-list">
@@ -55,16 +78,28 @@ const ChatArea = () => {
                 <div className="message-content">
                   {msg.role === 'user' ? msg.content : <MarkdownRenderer content={msg.content} />}
                   
-                  {isLastModelMessage && !isLoading && (
-                    <button 
-                      onClick={handleRegenerate}
-                      className="regenerate-btn"
-                      title="Regenerate response"
-                    >
-                      <RefreshCw size={14} />
-                      Regenerate
-                    </button>
-                  )}
+                  <div className="message-actions">
+                    {msg.role === 'model' && (
+                      <button 
+                        onClick={() => handleSpeak(msg.content)}
+                        className="action-icon-btn"
+                        title="Read aloud"
+                      >
+                        <Volume2 size={16} />
+                      </button>
+                    )}
+                    
+                    {isLastModelMessage && !isLoading && (
+                      <button 
+                        onClick={handleRegenerate}
+                        className="regenerate-btn"
+                        title="Regenerate response"
+                      >
+                        <RefreshCw size={14} />
+                        Regenerate
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );

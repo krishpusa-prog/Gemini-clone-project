@@ -11,8 +11,11 @@ const useChatStore = create(
       activeChatId: null,
       isLoading: false,
       error: null,
+      inputValue: '', // Shared input state for suggested prompts
 
       // Actions
+      setInputValue: (val) => set({ inputValue: val }),
+      
       setActiveChat: (id) => set({ activeChatId: id }),
 
       addMessage: (message) =>
@@ -79,6 +82,7 @@ const useChatStore = create(
     }),
     {
       name: 'gemini-chat-history',
+      partialize: (state) => ({ chats: state.chats, activeChatId: state.activeChatId }),
     }
   )
 );

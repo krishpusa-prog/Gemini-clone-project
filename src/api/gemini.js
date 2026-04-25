@@ -18,24 +18,40 @@ const handleGeminiError = (error) => {
   if (message.includes("quota") || message.includes("429")) {
     return "Rate limit exceeded. Please wait a moment before sending another message.";
   }
+  if (message.includes("not found") || message.includes("404")) {
+    return "Model not found. We are trying to use gemini-2.0-flash. Please ensure your API key has access to this model.";
+  }
   
   return message || "An unexpected error occurred while fetching the response.";
 };
 
 /**
- * Sends a prompt to the Gemini model and returns the text response.
+ * Sends a prompt (and optional image) to the Gemini model.
  */
-export const runChat = async (prompt) => {
+export const runChat = async (prompt, imageData = null) => {
   if (!API_KEY) {
     throw new Error("API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file.");
   }
 
   try {
+    // Switching to gemini-2.0-flash as it is the most stable multimodal model
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const result = await model.generateContent(prompt);
+
+    let result;
+    if (imageData) {
+      const imagePart = {
+        inlineData: {
+          data: imageData.data,
+          mimeType: imageData.mimeType,
+        },
+      };
+      result = await model.generateContent([prompt, imagePart]);
+    } else {
+      result = await model.generateContent(prompt);
+    }
+
     const response = await result.response;
     
-    // Check if the response was blocked
     if (response.promptFeedback?.blockReason) {
       throw new Error(`SAFETY: Content blocked due to ${response.promptFeedback.blockReason}`);
     }
