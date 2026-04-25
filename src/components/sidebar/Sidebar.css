@@ -86,24 +86,74 @@
   text-overflow: ellipsis;
 }
 
-.delete-chat-btn {
+.item-actions {
   opacity: 0;
   transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.history-item:hover .item-actions {
+  opacity: 1;
+}
+
+.item-action-btn {
   color: var(--text-dim);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
   border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-.history-item:hover .delete-chat-btn {
-  opacity: 1;
+.item-action-btn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
-.delete-chat-btn:hover {
+.item-action-btn.delete:hover {
   background-color: rgba(239, 68, 68, 0.1);
   color: var(--color-red);
+}
+
+/* Edit Mode Styles */
+.edit-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.edit-input {
+  flex: 1;
+  background-color: #2a2a2a;
+  border: 1px solid var(--color-blue);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  outline: none;
+  min-width: 0;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.edit-actions button {
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.edit-actions button:hover {
+  color: var(--color-blue);
 }
 
 .history-item-icon {

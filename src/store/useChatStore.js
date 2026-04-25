@@ -72,6 +72,13 @@ const useChatStore = create(
           activeChatId: state.activeChatId === id ? null : state.activeChatId,
         })),
 
+      renameChat: (id, newTitle) =>
+        set((state) => ({
+          chats: state.chats.map((c) =>
+            c.id === id ? { ...c, title: newTitle } : c
+          ),
+        })),
+
       clearAllHistory: () => set({ chats: [], activeChatId: null }),
     }),
     {
